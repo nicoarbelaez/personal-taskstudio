@@ -1,0 +1,1202 @@
+TaskStudio<!doctype html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TaskStudio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind_config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Syne', 'sans-serif'],
+            body: ['DM Sans', 'sans-serif'],
+          },
+          colors: {
+            surface: '#0d0d12',
+            panel: '#111118',
+            card: '#16161f',
+            border: '#1e1e2e',
+            accent: '#6c63ff',
+            accentHover: '#7c74ff',
+            accentGlow: 'rgba(108,99,255,0.18)',
+            muted: '#3a3a52',
+            textPrimary: '#e8e8f0',
+            textSecondary: '#8888aa',
+            textDim: '#55556a',
+            rose: '#ff5e6c',
+            roseGlow: 'rgba(255,94,108,0.12)',
+            emerald: '#2dd4a0',
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    :root {
+      --surface: #0d0d12;
+      --panel: #111118;
+      --card: #16161f;
+      --border: #1e1e2e;
+      --accent: #6c63ff;
+      --accent-hover: #7c74ff;
+      --accent-glow: rgba(108,99,255,0.18);
+      --muted: #3a3a52;
+      --text-primary: #e8e8f0;
+      --text-secondary: #8888aa;
+      --text-dim: #55556a;
+      --rose: #ff5e6c;
+      --emerald: #2dd4a0;
+    }
+
+    html, body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--surface);
+      color: var(--text-primary);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Subtle grid texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(108,99,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(108,99,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Orbs */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -200px;
+      right: -200px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(108,99,255,0.06) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .orb-bottom {
+      position: fixed;
+      bottom: -200px;
+      left: -100px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(45,212,160,0.04) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .content-wrap {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Panel styles */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .panel-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    /* Inputs */
+    .field {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .field::placeholder { color: var(--text-dim); }
+    .field:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    textarea.field { resize: vertical; }
+    select.field { cursor: pointer; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 9px 16px;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      border: none;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 0 0 var(--accent-glow);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+      box-shadow: 0 0 20px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover:not(:disabled) {
+      border-color: var(--muted);
+      color: var(--text-primary);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .btn-dark {
+      background: var(--card);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+    .btn-dark:hover:not(:disabled) {
+      background: #1e1e2e;
+      border-color: var(--muted);
+    }
+
+    .btn-danger {
+      background: rgba(255,94,108,0.1);
+      color: var(--rose);
+      border: 1px solid rgba(255,94,108,0.2);
+    }
+    .btn-danger:hover:not(:disabled) {
+      background: rgba(255,94,108,0.18);
+      border-color: rgba(255,94,108,0.4);
+      box-shadow: 0 0 16px var(--roseGlow, rgba(255,94,108,0.12));
+    }
+
+    .btn-sm { padding: 6px 12px; font-size: 0.8125rem; border-radius: 8px; }
+
+    /* Task card */
+    .task-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .task-item:hover {
+      border-color: var(--muted);
+      background: #181824;
+    }
+    .task-item.completed {
+      opacity: 0.55;
+    }
+    .task-item.completed .task-title-text {
+      text-decoration: line-through;
+      color: var(--text-dim);
+    }
+
+    /* Custom checkbox */
+    .task-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      min-width: 18px;
+      border: 2px solid var(--muted);
+      border-radius: 6px;
+      background: transparent;
+      cursor: pointer;
+      margin-top: 2px;
+      transition: all 0.18s;
+      position: relative;
+    }
+    .task-checkbox:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .task-checkbox:checked::after {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 1px;
+      width: 6px;
+      height: 10px;
+      border: 2px solid #fff;
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg);
+    }
+    .task-checkbox:hover:not(:checked) {
+      border-color: var(--accent);
+    }
+
+    /* Category pill */
+    .cat-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 10px;
+      border-radius: 99px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: rgba(108,99,255,0.1);
+      color: var(--accent);
+      border: 1px solid rgba(108,99,255,0.2);
+    }
+
+    /* Spinner */
+    .spinner {
+      border: 2px solid transparent;
+      border-top-color: rgba(255,255,255,0.9);
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg) } }
+
+    /* Modal */
+    #modalRoot {
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    .modal-box {
+      background: #13131c;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03);
+    }
+    .modal-scroll { max-height: 55vh; overflow: auto; }
+    .modal-scroll::-webkit-scrollbar { width: 4px; }
+    .modal-scroll::-webkit-scrollbar-track { background: transparent; }
+    .modal-scroll::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 4px; }
+
+    /* Scrollbar global */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 4px; }
+
+    /* Section label */
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0;
+    }
+
+    /* Summary badge */
+    .summary-badge {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+    }
+    .empty-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: #1a1a28;
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      z-index: 9999;
+      animation: slideUp 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toast::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--emerald);
+      flex-shrink: 0;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Preview panel */
+    .preview-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+    }
+
+    /* Header gradient text */
+    .gradient-text {
+      background: linear-gradient(135deg, #e8e8f0 30%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Responsive */
+    @media (min-width: 768px) { .container-max { max-width: 1080px; } }
+
+    /* Fade-in animation for tasks */
+    .task-item { animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+    /* Focus ring for accessibility */
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="orb-bottom"></div>
+  <div class="content-wrap px-4 py-8 container-max mx-auto">
+
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+      <div>
+        <h1 class="text-3xl font-display font-bold gradient-text tracking-tight" style="font-family:'Syne',sans-serif">TaskStudio</h1>
+        <p class="text-sm mt-1" style="color:var(--text-secondary)">Gestor de tareas · dark mode · export / import · validaciones</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <button id="btn-sample" class="btn btn-ghost btn-sm">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4m0 0 2-2M8 6 6 4"/><rect x="2" y="8" width="12" height="6" rx="2"/></svg>
+          Ejemplo
+        </button>
+        <button id="btn-export" class="btn btn-ghost btn-sm">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 11v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-2"/><path d="M8 2v8M5 7l3 3 3-3"/></svg>
+          Exportar JSON
+        </button>
+        <label for="importFile" class="btn btn-ghost btn-sm" style="cursor:pointer">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-2"/><path d="M8 10V2M5 5l3-3 3 3"/></svg>
+          Importar JSON
+        </label>
+        <input id="importFile" type="file" accept="application/json" class="hidden" />
+        <button id="btn-open-import-modal" class="btn btn-primary btn-sm">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1z"/><path d="M1 6h14"/></svg>
+          Import por texto
+        </button>
+      </div>
+    </header>
+
+    <!-- Main layout -->
+    <main class="grid md:grid-cols-3 gap-5">
+
+      <!-- Left column -->
+      <section class="md:col-span-1 space-y-4">
+
+        <!-- Add task -->
+        <div class="panel p-4">
+          <button id="btn-add" class="btn btn-primary w-full" style="font-size:0.9rem">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3v10M3 8h10"/></svg>
+            Nueva tarea
+          </button>
+        </div>
+
+        <!-- Bulk import -->
+        <div class="panel p-4">
+          <p class="section-label">Import masivo</p>
+          <p style="font-size:0.75rem;color:var(--text-dim);margin-bottom:8px;line-height:1.5">
+            Formato: <code style="color:var(--accent);font-size:0.72rem"># Categoria</code> y <code style="color:var(--accent);font-size:0.72rem">- Titulo (nota)</code>
+          </p>
+          <textarea id="bulkTextarea" rows="9" placeholder="# Categoria&#10;- Titulo tarea (nota opcional)&#10;- Otra tarea" class="field" style="font-size:0.8125rem;font-family:'DM Sans',sans-serif;line-height:1.6"></textarea>
+          <div class="flex gap-2 mt-2">
+            <button id="btn-clear-text" class="btn btn-danger btn-sm">Limpiar</button>
+          </div>
+
+          <!-- Real-time preview -->
+          <div id="parsePreview" class="mt-3" style="display:none"></div>
+        </div>
+
+      </section>
+
+      <!-- Right column: filters + tasks -->
+      <section class="md:col-span-2 space-y-4">
+
+        <!-- Filters -->
+        <div class="panel p-4">
+          <p class="section-label">Filtros</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <select id="filterStatus" class="field">
+              <option value="all">Todas las tareas</option>
+              <option value="active">Activas</option>
+              <option value="completed">Completadas</option>
+            </select>
+            <div style="position:relative">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);pointer-events:none"><circle cx="6.5" cy="6.5" r="4.5"/><path d="M14 14l-3-3"/></svg>
+              <input id="searchInput" placeholder="Buscar por título o nota…" class="field" style="padding-left:36px" />
+            </div>
+            <select id="filterCategory" class="field">
+              <option value="__all">Todas las categorías</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Task list -->
+        <div class="panel p-4">
+        <div class="flex items-center justify-between mb-4">
+          <h2 style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text-primary)">Tareas</h2>
+          <div class="flex items-center gap-2">
+            <span id="summary" class="summary-badge">0 tareas</span>
+            <button id="btn-clear-all" class="btn btn-danger btn-sm">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 4h12M5 4V2h6v2M13 4l-1 10H4L3 4"/><path d="M6 7v5M10 7v5"/></svg>
+              Borrar todo
+            </button>
+          </div>
+        </div>
+
+        <ul id="taskList" class="space-y-2">
+          <!-- tasks here -->
+        </ul>
+        </div><!-- end task list panel -->
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <div id="modalRoot" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.65)">
+    <div class="modal-box relative w-full max-w-2xl p-6">
+      <div class="flex items-start justify-between mb-1">
+        <h3 id="modalTitle" style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text-primary)"></h3>
+        <button id="modalCancel" style="background:transparent;border:none;color:var(--text-dim);cursor:pointer;padding:2px;display:flex;align-items:center;margin-top:2px">
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l10 10M13 3 3 13"/></svg>
+        </button>
+      </div>
+      <p id="modalMessage" style="font-size:0.875rem;color:var(--text-secondary);margin-top:4px"></p>
+      <div id="modalBody" class="mt-4 modal-scroll"></div>
+      <div class="mt-5 flex justify-end gap-2" style="border-top:1px solid var(--border);padding-top:16px">
+        <button id="modalCancelBtn" class="btn btn-ghost btn-sm">Cancelar</button>
+        <button id="modalConfirm" class="btn btn-primary btn-sm" disabled>Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Task template -->
+  <template id="taskTemplate">
+    <li class="task-item">
+      <div style="display:flex;gap:12px;align-items:flex-start;flex:1;min-width:0">
+        <input type="checkbox" class="task-checkbox" />
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+            <span class="task-title task-title-text" style="font-weight:500;font-size:0.9rem;color:var(--text-primary)"></span>
+            <span class="task-category cat-pill"></span>
+          </div>
+          <p class="task-note" style="font-size:0.8125rem;color:var(--text-secondary);line-height:1.5;margin:0"></p>
+          <p class="task-meta" style="font-size:0.72rem;color:var(--text-dim);margin-top:5px"></p>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button class="btn btn-dark btn-sm btn-edit">Editar</button>
+        <button class="btn btn-danger btn-sm btn-delete">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4h12M5 4V2h6v2M13 4l-1 10H4L3 4"/></svg>
+        </button>
+      </div>
+    </li>
+  </template>
+
+  <script>
+    const STORAGE_KEY = 'taskstudio_v1_data';
+    const STORAGE_META_KEY = 'taskstudio_v1_meta';
+    const uid = () => 't_' + Math.random().toString(36).slice(2,9);
+
+    const btnAdd = document.getElementById('btn-add');
+    const btnSample = document.getElementById('btn-sample');
+    const taskListEl = document.getElementById('taskList');
+    const taskTemplate = document.getElementById('taskTemplate');
+    const summaryEl = document.getElementById('summary');
+    const filterStatus = document.getElementById('filterStatus');
+    const filterCategory = document.getElementById('filterCategory');
+    const searchInput = document.getElementById('searchInput');
+    const btnExport = document.getElementById('btn-export');
+    const importFile = document.getElementById('importFile');
+    const btnOpenImportModal = document.getElementById('btn-open-import-modal');
+    const bulkTextarea = document.getElementById('bulkTextarea');
+    const parsePreview = document.getElementById('parsePreview');
+    const btnClearText = document.getElementById('btn-clear-text');
+    const btnClearAll = document.getElementById('btn-clear-all');
+
+    const modalRoot = document.getElementById('modalRoot');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalBody = document.getElementById('modalBody');
+    const modalConfirm = document.getElementById('modalConfirm');
+    const modalCancel = document.getElementById('modalCancel');
+    const modalCancelBtn = document.getElementById('modalCancelBtn');
+
+    let tasks = [];
+    let loading = false;
+
+    /***********************
+     * Persistence
+     ***********************/
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ version:1, savedAt:new Date().toISOString(), tasks }));
+    }
+    function load() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const p = JSON.parse(raw);
+        if (p && Array.isArray(p.tasks)) tasks = p.tasks;
+      } catch(e) { console.error(e); }
+    }
+    function exportJSON() {
+      const blob = new Blob([JSON.stringify({ exportedAt:new Date().toISOString(), tasks },null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `taskstudio-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.json`;
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+    function importFromJSONContent(jsonText, {replace=false}={}) {
+      try {
+        const parsed = JSON.parse(jsonText);
+        if (!Array.isArray(parsed.tasks)) throw new Error('Archivo inválido: no contiene array "tasks"');
+        if (!parsed.tasks.every(t=>t.id&&t.title&&t.category)) throw new Error('Estructura de tareas incorrecta.');
+        if (replace) { tasks = parsed.tasks; } else {
+          const ids = new Set(tasks.map(t=>t.id));
+          tasks = tasks.concat(parsed.tasks.filter(t=>!ids.has(t.id)));
+        }
+        save(); render(); toast('Importado correctamente');
+      } catch(e) { modalError('Import JSON', e.message); }
+    }
+
+    /***********************
+     * Utilities
+     ***********************/
+    function nowISO() { return new Date().toISOString(); }
+    function fmtDate(iso) {
+      if (!iso) return '';
+      try { return new Date(iso).toLocaleString(undefined,{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }
+      catch(e){ return iso; }
+    }
+    function setLoadingFor(dur=500) {
+      loading=true; renderLoading();
+      return new Promise(r=>setTimeout(()=>{loading=false;renderLoading();r()},dur));
+    }
+    function toast(msg, time=2400) {
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity 0.3s'; setTimeout(()=>t.remove(),300); }, time);
+    }
+    function escapeHtml(s='') {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    /***********************
+     * Modal system
+     ***********************/
+    function modalOpen({title='',message='',renderBody=null,onConfirm=null,validate=null,confirmLabel='Confirmar'}={}) {
+      modalTitle.textContent = title;
+      modalMessage.textContent = message||'';
+      modalBody.innerHTML = '';
+      if (typeof renderBody==='function') renderBody(modalBody);
+      modalConfirm.textContent = confirmLabel;
+      modalConfirm.disabled = !!validate;
+      modalRoot.classList.remove('hidden');
+      modalRoot.style.display = 'flex';
+
+      const runValidate = () => {
+        if (!validate) { modalConfirm.disabled=false; return; }
+        try {
+          const result = validate();
+          if (result&&result.ok) {
+            modalConfirm.disabled=false;
+            modalMessage.textContent=result.message||message||'';
+            modalMessage.style.color='';
+          } else {
+            modalConfirm.disabled=true;
+            modalMessage.textContent=result&&result.message?result.message:(message||'');
+            modalMessage.style.color='var(--rose)';
+          }
+        } catch(e) { modalConfirm.disabled=true; modalMessage.textContent=e.message||'Error'; }
+      };
+
+      modalBody.addEventListener('input', runValidate);
+
+      const cleanup = () => {
+        modalBody.removeEventListener('input', runValidate);
+        modalRoot.classList.add('hidden');
+        modalRoot.style.display = 'none';
+        modalMessage.style.color = '';
+      };
+
+      const onConfirmWrapper = async () => {
+        modalConfirm.disabled=true; modalCancelBtn.disabled=true; modalCancel.disabled=true;
+        const spinner=document.createElement('span');
+        spinner.className='spinner';
+        modalConfirm.prepend(spinner);
+        await setLoadingFor(600);
+        try { if (onConfirm) await onConfirm(); }
+        finally { spinner.remove(); modalCancelBtn.disabled=false; modalCancel.disabled=false; cleanup(); }
+      };
+
+      modalConfirm.onclick = onConfirmWrapper;
+      modalCancel.onclick = cleanup;
+      modalCancelBtn.onclick = cleanup;
+
+      // close on backdrop click
+      modalRoot.onclick = (e) => { if (e.target===modalRoot) cleanup(); };
+      runValidate();
+    }
+
+    function modalError(title, message) {
+      modalOpen({ title, message, renderBody:el=>{
+        const p=document.createElement('p');
+        p.style.cssText='font-size:.875rem;color:var(--rose)';
+        p.textContent=message; el.appendChild(p);
+      }, onConfirm:()=>{}, confirmLabel:'Cerrar', validate:null });
+    }
+
+    /***********************
+     * CRUD
+     ***********************/
+    function addTask(task) {
+      tasks.push({ id:uid(), title:task.title.trim(), category:task.category.trim(),
+        note:task.note?task.note.trim():'', createdAt:nowISO(), updatedAt:nowISO(),
+        completed:false, completedNote:null, completedAt:null });
+      save(); render();
+    }
+    function updateTask(id, changes) {
+      const t = tasks.find(x=>x.id===id); if (!t) return;
+      Object.assign(t, changes); t.updatedAt=nowISO(); save(); render();
+    }
+    function removeTask(id) { tasks=tasks.filter(x=>x.id!==id); save(); render(); }
+    function clearAll() { tasks=[]; save(); render(); }
+
+    /***********************
+     * Render
+     ***********************/
+    function renderCategories() {
+      const current = filterCategory.value;
+      const cats = Array.from(new Set(tasks.map(t=>t.category))).sort();
+      filterCategory.innerHTML='<option value="__all">Todas las categorías</option>';
+      cats.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; filterCategory.appendChild(o); });
+      // Restore selection if the category still exists
+      if (current && [...filterCategory.options].some(o=>o.value===current)) {
+        filterCategory.value = current;
+      }
+    }
+
+    function render() {
+      const status = filterStatus.value;
+      const catFilter = filterCategory.value;
+      const q = searchInput.value.trim().toLowerCase();
+      let items = tasks.slice().sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+      if (status==='active') items=items.filter(t=>!t.completed);
+      if (status==='completed') items=items.filter(t=>t.completed);
+      if (catFilter&&catFilter!=='__all') items=items.filter(t=>t.category===catFilter);
+      if (q) items=items.filter(t=>t.title.toLowerCase().includes(q)||(t.note&&t.note.toLowerCase().includes(q)));
+
+      summaryEl.textContent = `${items.length} / ${tasks.length} tareas`;
+      taskListEl.innerHTML='';
+
+      if (items.length===0) {
+        taskListEl.innerHTML=`<li class="empty-state">
+          <div class="empty-icon">📋</div>
+          <p style="font-size:.9rem;color:var(--text-secondary);font-weight:500">No hay tareas que mostrar</p>
+          <p style="font-size:.8rem;color:var(--text-dim);margin-top:4px">Agrega una tarea o cambia los filtros</p>
+        </li>`;
+      } else {
+        for (const t of items) {
+          const tpl = taskTemplate.content.cloneNode(true);
+          const li = tpl.querySelector('li');
+          const checkbox = tpl.querySelector('.task-checkbox');
+          const titleEl = tpl.querySelector('.task-title');
+          const categoryEl = tpl.querySelector('.task-category');
+          const noteEl = tpl.querySelector('.task-note');
+          const metaEl = tpl.querySelector('.task-meta');
+          const btnEdit = tpl.querySelector('.btn-edit');
+          const btnDelete = tpl.querySelector('.btn-delete');
+
+          titleEl.textContent = t.title;
+          categoryEl.textContent = t.category;
+          noteEl.textContent = t.note||'';
+          metaEl.textContent = `Creada: ${fmtDate(t.createdAt)}${t.completed?' · Completada: '+fmtDate(t.completedAt):''}`;
+          checkbox.checked = !!t.completed;
+          if (t.completed) li.classList.add('completed');
+
+          checkbox.addEventListener('change', (e)=>{
+            if (e.target.checked) {
+              modalOpen({ title:'Marcar como completada', message:'Puedes dejar una nota de confirmación (opcional).',
+                renderBody:(root)=>{
+                  const ta=document.createElement('textarea');
+                  ta.rows=3; ta.placeholder='Nota de completado (opcional)'; ta.className='field';
+                  root.appendChild(ta);
+                }, validate:null,
+                onConfirm:async()=>{
+                  const ta=modalBody.querySelector('textarea');
+                  updateTask(t.id,{completed:true,completedNote:ta?ta.value.trim():'',completedAt:nowISO()});
+                }
+              });
+            } else {
+              modalOpen({ title:'Desmarcar tarea', message:'¿Confirmas desmarcar esta tarea como completada?',
+                renderBody:(root)=>{
+                  const ta=document.createElement('textarea');
+                  ta.rows=2; ta.placeholder='Nota (opcional)'; ta.className='field';
+                  root.appendChild(ta);
+                }, validate:null,
+                onConfirm:async()=>{ updateTask(t.id,{completed:false,completedNote:null,completedAt:null}); }
+              });
+            }
+          });
+
+          btnEdit.addEventListener('click',()=>{
+            modalOpen({ title:'Editar tarea', message:'Modifica los campos y confirma.',
+              renderBody:(root)=>{
+                root.innerHTML=`<div style="display:flex;flex-direction:column;gap:10px">
+                  <div><label style="font-size:.75rem;color:var(--text-dim);display:block;margin-bottom:4px">Categoría</label>
+                  <input id="m_cat" class="field" value="${escapeHtml(t.category)}" /></div>
+                  <div><label style="font-size:.75rem;color:var(--text-dim);display:block;margin-bottom:4px">Título</label>
+                  <input id="m_title" class="field" value="${escapeHtml(t.title)}" /></div>
+                  <div><label style="font-size:.75rem;color:var(--text-dim);display:block;margin-bottom:4px">Nota (opcional)</label>
+                  <textarea id="m_note" rows="3" class="field">${escapeHtml(t.note||'')}</textarea></div>
+                </div>`;
+              },
+              validate:()=>{
+                const title=modalBody.querySelector('#m_title')?.value||'';
+                const cat=modalBody.querySelector('#m_cat')?.value||'';
+                if (!title.trim()) return {ok:false,message:'El título es obligatorio'};
+                if (!cat.trim()) return {ok:false,message:'La categoría es obligatoria'};
+                return {ok:true};
+              },
+              onConfirm:async()=>{
+                updateTask(t.id,{
+                  title:modalBody.querySelector('#m_title').value,
+                  category:modalBody.querySelector('#m_cat').value,
+                  note:modalBody.querySelector('#m_note').value
+                });
+              }
+            });
+          });
+
+          btnDelete.addEventListener('click',()=>{
+            modalOpen({ title:'Eliminar tarea',
+              message:`¿Seguro que deseas eliminar "${t.title}"? Esta acción no se puede deshacer.`,
+              renderBody:(root)=>{
+                const hint=document.createElement('p');
+                hint.style.cssText='font-size:.8125rem;color:var(--text-dim);margin-bottom:6px';
+                hint.textContent='Para confirmar escribe: ELIMINAR';
+                root.appendChild(hint);
+                const inp=document.createElement('input');
+                inp.className='field'; root.appendChild(inp);
+              },
+              validate:()=>{
+                const v=modalBody.querySelector('input')?.value||'';
+                return {ok:v.trim().toUpperCase()==='ELIMINAR',message:'Escribe "ELIMINAR" para confirmar'};
+              },
+              onConfirm:async()=>removeTask(t.id)
+            });
+          });
+
+          taskListEl.appendChild(tpl);
+        }
+      }
+      renderCategories();
+    }
+
+    function renderLoading() {
+      document.querySelectorAll('button,input,textarea,select').forEach(b=>{ b.disabled=loading&&!b.classList.contains('btn'); });
+    }
+
+    /***********************
+     * Bulk text parser
+     ***********************/
+    function parseBulkText(text) {
+      const lines=text.split(/\r?\n/);
+      const blocks=[]; let currentCat=null; const errors=[];
+      for (let i=0;i<lines.length;i++) {
+        const raw=lines[i].trim();
+        if (!raw) continue;
+        const hm=raw.match(/^#\s*(.+)$/);
+        if (hm) { currentCat=hm[1].trim(); blocks.push({category:currentCat,tasks:[],line:i+1}); continue; }
+        const tm=raw.match(/^\-\s*(.+)$/);
+        if (tm) {
+          if (!currentCat) { errors.push({line:i+1,message:'Tarea sin categoría previa'}); continue; }
+          const content=tm[1].trim();
+          const nm=content.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
+          let title=content,note='';
+          if (nm) { title=nm[1].trim(); note=nm[2].trim(); }
+          if (!title) { errors.push({line:i+1,message:'Título vacío'}); continue; }
+          blocks[blocks.length-1].tasks.push({title,note}); continue;
+        }
+        errors.push({line:i+1,message:'Línea ignorada (no cumple formato)'});
+      }
+      if (blocks.length===0) errors.push({line:0,message:'No se detectó ningún bloque válido.'});
+      return {ok:errors.length===0,data:blocks,errors};
+    }
+
+    /***********************
+     * Real-time bulk preview
+     ***********************/
+    function renderBulkPreview() {
+      const txt = bulkTextarea.value;
+      if (!txt.trim()) {
+        parsePreview.style.display='none';
+        parsePreview.innerHTML='';
+        return;
+      }
+      parsePreview.style.display='block';
+      const parsed = parseBulkText(txt);
+      parsePreview.innerHTML='';
+
+      if (!parsed.ok && parsed.data.length===0) {
+        parsePreview.innerHTML=`<div class="preview-section" style="border-color:rgba(255,94,108,0.25)">
+          ${parsed.errors.map(e=>`<div style="color:var(--rose);font-size:.78rem;margin-bottom:2px">⚠ L${e.line||'?'}: ${escapeHtml(e.message)}</div>`).join('')}
+        </div>`;
+        return;
+      }
+
+      const total = parsed.data.reduce((acc,b)=>acc+b.tasks.length,0);
+
+      let html = `<div class="preview-section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <span style="font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim)">Vista previa</span>
+          <span style="font-size:.72rem;background:var(--accent-glow);border:1px solid rgba(108,99,255,0.25);color:var(--accent);padding:2px 8px;border-radius:99px">${total} tarea${total!==1?'s':''}</span>
+        </div>`;
+
+      for (const b of parsed.data) {
+        html+=`<div style="margin-bottom:10px">
+          <div style="font-size:.75rem;font-weight:700;color:var(--accent);letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px">${escapeHtml(b.category)}</div>
+          <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:3px">`;
+        b.tasks.forEach(t=>{
+          html+=`<li style="font-size:.8rem;color:var(--text-secondary);display:flex;align-items:flex-start;gap:6px">
+            <span style="color:var(--text-dim);margin-top:1px">›</span>
+            <span>${escapeHtml(t.title)}${t.note?`<span style="color:var(--text-dim)"> — ${escapeHtml(t.note)}</span>`:''}</span>
+          </li>`;
+        });
+        html+=`</ul></div>`;
+      }
+
+      if (!parsed.ok) {
+        html+=`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+          ${parsed.errors.map(e=>`<div style="color:var(--rose);font-size:.75rem">⚠ L${e.line||'?'}: ${escapeHtml(e.message)}</div>`).join('')}
+        </div>`;
+      }
+
+      html+=`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;gap:6px">
+        <button id="previewImportBtn" class="btn btn-primary btn-sm" style="flex:1">Importar (merge)</button>
+        <button id="previewReplaceBtn" class="btn btn-danger btn-sm">Reemplazar</button>
+      </div></div>`;
+
+      parsePreview.innerHTML=html;
+
+      parsePreview.querySelector('#previewImportBtn')?.addEventListener('click',()=>{
+        modalOpen({
+          title:'Confirmar importación',
+          message:`Agregar ${total} tarea${total!==1?'s':''} a las existentes.`,
+          renderBody:()=>{},
+          validate:null,
+          onConfirm:async()=>{
+            for (const b of parsed.data) for (const it of b.tasks) addTask({title:it.title,category:b.category,note:it.note});
+            toast(`${total} tarea${total!==1?'s':''} importadas`);
+          },
+          confirmLabel:'Importar'
+        });
+      });
+
+      parsePreview.querySelector('#previewReplaceBtn')?.addEventListener('click',()=>{
+        modalOpen({
+          title:'Reemplazar todo',
+          message:`Se borrarán las tareas actuales y se importarán ${total} nueva${total!==1?'s':''}.`,
+          renderBody:(root)=>{
+            const inp=document.createElement('input');
+            inp.className='field'; inp.placeholder='Escribe REEMPLAZAR para confirmar';
+            root.appendChild(inp);
+          },
+          validate:()=>{
+            const v=modalBody.querySelector('input')?.value||'';
+            return {ok:v.trim().toUpperCase()==='REEMPLAZAR',message:'Escribe "REEMPLAZAR" para confirmar'};
+          },
+          onConfirm:async()=>{
+            tasks=[];
+            for (const b of parsed.data) for (const it of b.tasks) addTask({title:it.title,category:b.category,note:it.note});
+            toast('Importado y reemplazado');
+          },
+          confirmLabel:'Reemplazar'
+        });
+      });
+    }
+
+    // Wire real-time preview
+    bulkTextarea.addEventListener('input', renderBulkPreview);
+
+    /***********************
+     * UI Bindings
+     ***********************/
+    btnAdd.addEventListener('click',()=>{
+      modalOpen({
+        title:'Nueva tarea', message:'Rellena título y categoría. La nota es opcional.',
+        renderBody:(root)=>{
+          root.innerHTML=`<div style="display:flex;flex-direction:column;gap:10px">
+            <div><label style="font-size:.75rem;color:var(--text-dim);display:block;margin-bottom:4px">Categoría</label>
+            <input id="m_cat" class="field" placeholder="Ej: Cafetería" /></div>
+            <div><label style="font-size:.75rem;color:var(--text-dim);display:block;margin-bottom:4px">Título</label>
+            <input id="m_title" class="field" placeholder="Ej: Preparar cappuccino" /></div>
+            <div><label style="font-size:.75rem;color:var(--text-dim);display:block;margin-bottom:4px">Nota (opcional)</label>
+            <textarea id="m_note" rows="3" class="field" placeholder="Algo importante…"></textarea></div>
+          </div>`;
+        },
+        validate:()=>{
+          const title=modalBody.querySelector('#m_title')?.value||'';
+          const cat=modalBody.querySelector('#m_cat')?.value||'';
+          if (!title.trim()) return {ok:false,message:'El título es obligatorio'};
+          if (!cat.trim()) return {ok:false,message:'La categoría es obligatoria'};
+          return {ok:true};
+        },
+        onConfirm:async()=>{
+          addTask({title:modalBody.querySelector('#m_title').value,category:modalBody.querySelector('#m_cat').value,note:modalBody.querySelector('#m_note').value});
+          toast('Tarea agregada');
+        },
+        confirmLabel:'Agregar'
+      });
+    });
+
+    btnExport.addEventListener('click', exportJSON);
+
+    importFile.addEventListener('change',(e)=>{
+      const f=e.target.files[0]; if (!f) return;
+      const reader=new FileReader();
+      reader.onload=()=>{
+        modalOpen({
+          title:'Importar archivo JSON',
+          message:'¿Deseas reemplazar los datos actuales o agregar (merge)?',
+          renderBody:(root)=>{
+            root.innerHTML=`<div style="display:flex;gap:8px;margin-bottom:12px">
+              <button id="imp_replace" class="btn btn-danger btn-sm">Reemplazar</button>
+              <button id="imp_merge" class="btn btn-dark btn-sm">Agregar (merge)</button>
+            </div>
+            <div style="font-size:.72rem;color:var(--text-dim);margin-bottom:6px">Preview del archivo:</div>
+            <pre style="font-size:.72rem;color:var(--text-secondary);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;overflow:auto;max-height:160px">${escapeHtml(reader.result.slice(0,1000))}</pre>`;
+          },
+          onConfirm:async()=>{},validate:null
+        });
+        setTimeout(()=>{
+          const b1=modalBody.querySelector('#imp_replace');
+          const b2=modalBody.querySelector('#imp_merge');
+          if (b1) b1.onclick=()=>{ importFromJSONContent(reader.result,{replace:true}); modalCancelBtn.click(); };
+          if (b2) b2.onclick=()=>{ importFromJSONContent(reader.result,{replace:false}); modalCancelBtn.click(); };
+        },40);
+      };
+      reader.readAsText(f); e.target.value='';
+    });
+
+    btnOpenImportModal.addEventListener('click',()=>{
+      modalOpen({
+        title:'Importar desde texto',
+        message:'Pega texto con formato # Categoria y - Titulo (nota).',
+        renderBody:(root)=>{
+          root.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div>
+              <label style="font-size:.75rem;color:var(--text-dim);display:block;margin-bottom:4px">Texto</label>
+              <textarea id="imp_text" rows="12" class="field" style="font-size:.8rem"></textarea>
+              <button id="imp_clear" class="btn btn-danger btn-sm" style="margin-top:6px">Limpiar</button>
+            </div>
+            <div>
+              <label style="font-size:.75rem;color:var(--text-dim);display:block;margin-bottom:4px">Vista previa</label>
+              <div id="imp_preview_box" style="font-size:.8rem;min-height:60px;color:var(--text-secondary)"></div>
+            </div>
+          </div>`;
+        },
+        validate:()=>{
+          const txt=modalBody.querySelector('#imp_text')?.value||'';
+          if (!txt.trim()) return {ok:false,message:'Pega el texto a importar'};
+          const parsed=parseBulkText(txt);
+          if (!parsed.ok) return {ok:false,message:parsed.errors.map(e=>`L${e.line||''}: ${e.message}`).join(' · ')};
+          return {ok:true,message:'Formato válido — confirma para importar'};
+        },
+        onConfirm:async()=>{
+          const txt=modalBody.querySelector('#imp_text')?.value;
+          const parsed=parseBulkText(txt);
+          let count=0;
+          for (const b of parsed.data) for (const it of b.tasks) { addTask({title:it.title,category:b.category,note:it.note}); count++; }
+          toast(`Importadas ${count} tareas`);
+        },
+        confirmLabel:'Importar'
+      });
+
+      setTimeout(()=>{
+        const ta=modalBody.querySelector('#imp_text');
+        const box=modalBody.querySelector('#imp_preview_box');
+        const clrBtn=modalBody.querySelector('#imp_clear');
+
+        const updatePreview=()=>{
+          if (!ta||!box) return;
+          box.innerHTML='';
+          if (!ta.value.trim()) return;
+          const parsed=parseBulkText(ta.value);
+          if (!parsed.ok && parsed.data.length===0) {
+            box.innerHTML=parsed.errors.map(e=>`<div style="color:var(--rose);font-size:.75rem">⚠ ${escapeHtml(e.message)}</div>`).join('');
+            return;
+          }
+          for (const b of parsed.data) {
+            const h=document.createElement('div');
+            h.style.cssText='font-weight:700;color:var(--accent);font-size:.75rem;margin-bottom:4px;margin-top:8px;text-transform:uppercase;letter-spacing:.04em';
+            h.textContent=b.category; box.appendChild(h);
+            b.tasks.forEach(t=>{
+              const li=document.createElement('div');
+              li.style.cssText='font-size:.78rem;color:var(--text-secondary);margin-left:8px';
+              li.textContent=`› ${t.title}${t.note?' — '+t.note:''}`;
+              box.appendChild(li);
+            });
+          }
+        };
+
+        if (ta) ta.addEventListener('input', updatePreview);
+        if (clrBtn) clrBtn.onclick=()=>{ ta.value=''; box.innerHTML=''; modalConfirm.disabled=true; };
+      },50);
+    });
+
+    btnClearText.addEventListener('click',()=>{ bulkTextarea.value=''; parsePreview.style.display='none'; parsePreview.innerHTML=''; });
+
+    btnClearAll.addEventListener('click',()=>{
+      modalOpen({
+        title:'Borrar todo',
+        message:'Se eliminarán todas las tareas. Considera exportar antes.',
+        renderBody:(root)=>{
+          const inp=document.createElement('input');
+          inp.className='field'; inp.placeholder='Escribe "BORRAR TODO" para confirmar';
+          root.appendChild(inp);
+        },
+        validate:()=>{
+          const v=modalBody.querySelector('input')?.value||'';
+          return {ok:v.trim().toUpperCase()==='BORRAR TODO',message:'Escribe "BORRAR TODO" para confirmar'};
+        },
+        onConfirm:async()=>{ clearAll(); toast('Todo borrado'); }
+      });
+    });
+
+    btnSample.addEventListener('click',()=>{
+      const sample=`# Nuevas características
+
+- Agregar opción de decoración para hombre o mujer en ponqués de sabor envinada y baraján.
+- Agregar opción de recoger en tienda o domicilio en el flujo del pedido.
+- Agregar aceptación de términos y condiciones antes de confirmar el pedido.
+- Permitir que el bot reconozca producto, cantidad, fecha y hora cuando el usuario lo escriba en un mensaje.
+- Agregar y probar palabras clave del bot incluyendo variantes o palabras no lógicas.
+- Solicitar cantidad cuando el pedido provenga de la sección cafetería.
+- Mostrar botones Hacer pedido o Ver menú anterior cuando el usuario esté viendo un menú específico.
+- Definir abono obligatorio de 50 para pedidos que lo requieran.
+- Conectar el bot con Meta para funcionamiento en WhatsApp.
+
+# Arreglos / Bugs
+- Corregir que el bot no pregunta fecha para pedidos de ponqués.
+- Corregir que el bot no pregunta hora para pedidos de ponqués.
+- Corregir que la opción Volver regrese realmente al paso anterior del flujo.
+- Eliminar mensajes o textos que incluyan la frase "no lograr".
+- En el menú de ponqués, mostrar solo las opciones Ordenar ponqué y Volver atrás.
+
+# Cambios pequeños / Mejora UX
+- Hacer los mensajes del bot más cortos y amables.
+- Mostrar el mensaje "Por favor selecciona en el menú lo que desees y dale click para continuar" al presentar opciones.
+- Agregar el botón Volver en todos los menús del bot.
+- Solicitar que la cantidad se escriba en números y permitir varios valores separados por comas.
+- Al visualizar un menú, llevar al usuario a las opciones del menú seleccionado.`;
+      bulkTextarea.value=sample;
+      renderBulkPreview();
+      toast('Ejemplo cargado');
+    });
+
+    filterStatus.addEventListener('change', render);
+    filterCategory.addEventListener('change', render);
+    searchInput.addEventListener('input', render);
+
+    load(); render();
+
+    console.log('TaskStudio · STORAGE_KEY =', STORAGE_KEY);
+
+    if (!localStorage.getItem(STORAGE_META_KEY)) {
+      localStorage.setItem(STORAGE_META_KEY, JSON.stringify({firstRun:new Date().toISOString()}));
+      setTimeout(()=>{
+        modalOpen({
+          title:'Bienvenido a TaskStudio',
+          message:'Tip: localStorage es específico por dominio. Usa Exportar JSON antes de cambiar de dominio, luego importa en el nuevo.',
+          renderBody:(root)=>{
+            root.innerHTML=`<p style="font-size:.875rem;color:var(--text-secondary)">¿Quieres cargar un ejemplo de tareas para probar el import masivo?</p>
+              <button id="pr_loadSample" class="btn btn-primary btn-sm" style="margin-top:10px">Cargar ejemplo</button>`;
+          },
+          onConfirm:()=>{}, validate:null, confirmLabel:'Cerrar'
+        });
+        setTimeout(()=>{
+          const b=modalBody.querySelector('#pr_loadSample');
+          if (b) b.onclick=()=>{ document.getElementById('btn-sample').click(); modalCancelBtn.click(); };
+        },50);
+      },800);
+    }
+  </script>
+</body>
+</html>
